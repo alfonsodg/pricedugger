@@ -71,7 +71,10 @@ wss.on('connection', function(ws) {
                                                     blah['coordinates'] = body.results[0].geometry;
                                                     //console.log(body.results[0].geometry);                                    
                                                 }
-                                                ws.send(JSON.stringify(blah));
+                                                ws.send(JSON.stringify(blah), function ack(error) {
+                                                    console.log('failed');
+                                                });
+                                                //ws.send();
                                                 //console.log(blah) // Print the json response
                                             }
                                         })
