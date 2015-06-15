@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PriceDIG - Monitoreo Visual de Medicamentos</title>
+<!--  <script src="static/jquery-ui.min.js"></script> -->
+  <!--link rel="stylesheet" href="/resources/demos/style.css"-->
+
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<link rel="stylesheet" href="static/leaflet.css" />
+
+	<script src="static/leaflet.js"></script>
+  <link rel="stylesheet" href="static/jquery-ui.min.css">
+  <script src="static/jquery.min.js"></script>
+  <script src="static/jquery-ui.min.js"></script>
+      <script type="text/javascript">
+    var root = location.host;
+    var ws = new WebSocket("ws://"+root+":9981");
+    ws.onopen = function() {
+        ws.send('http://observatorio.digemid.minsa.gob.pe/Precios/ProcesoL/Consulta/BusquedaGral.aspx?grupo=2926*3&total=1*1&con=120mg/5mL&ffs=24&ubigeo=15&cad=PARACETAL*120mg/5mL*Solucion*-*Suspension');
+    };
+
+  </script>
+
+  <script>
+  $(function() {
+    var availableTags = [
+      "PARACETAMOL*500*Tableta",
+      "IBUPROFENO*400mg*Tableta"
+    ];
+    $( "#tags" ).autocomplete({
+      source: availableTags
+    });
+  });
+  </script>
+
+	<style>
+		body {
+			padding: 0;
+			margin: 0;
+		}
+		html, body, #map {
+			height: 100%;
+		}
+	</style>
+</head>
+<body>
+    <div align="center">
+<form method="post">
+    <div class="ui-widget">
+    <label for="tags">Farmaco:</label>
+    <input name="drug" id="tags" type="text" />
+    <input value="Buscar" type="submit" />
+    </div>
+</form>
+</div>
+	<div id="map"></div>
+    <div id="container"></div>
+	<script>
+		var map = L.map('map');
+
+		L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+			maxZoom: 18,
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			id: 'examples.map-i875mjb7'
+		}).addTo(map);
+
+		function onLocationFound(e) {
+			var radius = e.accuracy / 2;
+
+			L.marker(e.latlng).addTo(map)
+				.bindPopup("Te encuentras a " + radius + " metros de este punto").openPopup();
+
+			L.circle(e.latlng, radius).addTo(map);
+		}
+
+		function onLocationError(e) {
+			alert(e.message);
+		}
+
+		map.on('locationfound', onLocationFound);
+		map.on('locationerror', onLocationError);
+
+		map.locate({setView: true, maxZoom: 15});
+
+        xx = -12.0711665;
+        yy = -76.9544833;
+        
+    ws.onmessage = function (evt) {
+        data_val = evt.data;
+        str = jQuery.parseJSON(data_val);
+        console.log(str);
+        x = parseFloat(xx) + parseFloat((Math.random() * (0.0010 - 0.0250) + 0.0250).toFixed(4))
+        y = parseFloat(yy) + parseFloat((Math.random() * (0.0010 - 0.0250) + 0.0250).toFixed(4))
+        //coords = [x, y];
+        coords = str['coordinates'];
+        if (typeof coords !== 'undefined') {
+            L.marker(coords).addTo(map).bindPopup(str['html']).openPopup();
+        }
+        //console.log(x);
+    };
+
+	</script>
+
+
+</body>
+</html>
