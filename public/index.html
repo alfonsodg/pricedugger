@@ -17,7 +17,7 @@
   <script src="static/jquery-ui.min.js"></script>
       <script type="text/javascript">
     var root = location.host;
-    var ws = new WebSocket("ws://0.0.0.0:9981");
+    var ws = new WebSocket("ws://104.236.41.122:9981");
     ws.onopen = function() {
         ws.send('http://observatorio.digemid.minsa.gob.pe/Precios/ProcesoL/Consulta/BusquedaGral.aspx?grupo=2926*3&total=1*1&con=120mg/5mL&ffs=24&ubigeo=15&cad=PARACETAL*120mg/5mL*Solucion*-*Suspension');
     };
