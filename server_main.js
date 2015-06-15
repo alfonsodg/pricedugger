@@ -11,7 +11,7 @@ var cfenv = require('cfenv');
 
 var x = Xray();
 var app = express();
-var appEnv = cfenv.getAppEnv();
+//var appEnv = cfenv.getAppEnv();
 
 
 
@@ -19,7 +19,7 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.listen(9980, '0.0.0.0', function() {
-  console.log("server starting on " + appEnv.url);
+  console.log("server starting on ");
 });
 
 //var port = (process.env.VCAP_APP_PORT || 9981); 
