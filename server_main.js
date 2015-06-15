@@ -4,25 +4,27 @@ var WebSocketServer = require('ws').Server;
 var Nightmare = require('nightmare');
 var cheerio = require('cheerio');
 var Xray = require('x-ray');
-var x = Xray();
 var express = require('express');
 var request = require('request');
-
 var cfenv = require('cfenv');
 
+
+var x = Xray();
 var app = express();
+var appEnv = cfenv.getAppEnv();
+
+
 
 app.use(express.static(__dirname + '/public'));
 
-var appEnv = cfenv.getAppEnv();
 
-app.listen(appEnv.port, appEnv.bind, function() {
+app.listen(9980, '0.0.0.0', function() {
   console.log("server starting on " + appEnv.url);
 });
 
-var port = (process.env.VCAP_APP_PORT || 9981); 
+//var port = (process.env.VCAP_APP_PORT || 9981); 
 
-wss = new WebSocketServer({port: port});
+wss = new WebSocketServer({port: '9981'});
 
 
 wss.on('connection', function(ws) {
