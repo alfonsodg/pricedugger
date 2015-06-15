@@ -9,11 +9,12 @@
         "express": "4.12.x",
         "cfenv": "1.0.x",
         "cheerio":"0.19.0",
+        "phantomjs":"1.9.17",
         "phantom":"0.7.2",
         "x-ray":"2.0.0",
         "nightmare":"1.8.2",
         "ws":"0.7.2",
-        "request":"2.57.0"
+        "request":"2.57.0",
     },
     "repository": {}
 }
