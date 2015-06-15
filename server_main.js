@@ -73,6 +73,7 @@ wss.on('connection', function(ws) {
                                                 }
                                                 ws.send(JSON.stringify(blah), function ack(error) {
                                                     console.log('failed');
+                                                    console.log(error);
                                                 });
                                                 //ws.send();
                                                 //console.log(blah) // Print the json response
