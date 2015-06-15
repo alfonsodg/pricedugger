@@ -65,15 +65,15 @@ wss.on('connection', function(ws) {
                                     request({
                                         url: gurl,
                                         json: true
-                                        }, function (error, response, body) {
-                                            if (!error && response.statusCode === 200) {
+                                        }, function (xerror, xresponse, body) {
+                                            if (!xerror && xresponse.statusCode === 200) {
                                                 if (typeof body.results[0] !== 'undefined') {
                                                     blah['coordinates'] = body.results[0].geometry;
                                                     //console.log(body.results[0].geometry);                                    
                                                 }
-                                                ws.send(JSON.stringify(blah), function ack(error) {
+                                                ws.send(JSON.stringify(blah), function ack(werror) {
                                                     console.log('failed');
-                                                    console.log(error);
+                                                    console.log(werror);
                                                 });
                                                 //ws.send();
                                                 //console.log(blah) // Print the json response
