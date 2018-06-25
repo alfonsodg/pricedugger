@@ -1,0 +1,107 @@
+//var phantom = require('phantom');
+require('events').EventEmitter.prototype._maxListeners = 100;
+var WebSocketServer = require('ws').Server;
+//var Nightmare = require('nightmare');
+//var cheerio = require('cheerio');
+//var Xray = require('x-ray');
+var express = require('express');
+//var request = require('request');
+//var cfenv = require('cfenv');
+var Nightmare = require('nightmare'),
+    nightmare = Nightmare({
+        show: false
+    });
+var cheerio = require('cheerio');
+var request = require('request');
+
+//var x = Xray();
+var app = express();
+//var appEnv = cfenv.getAppEnv();
+
+
+
+app.use(express.static(__dirname + '/public'));
+
+
+app.listen(9980, '0.0.0.0', function() {
+  console.log("server starting on ");
+});
+
+//var port = (process.env.VCAP_APP_PORT || 9981); 
+
+wss = new WebSocketServer({port: '9981'});
+
+
+wss.on('connection', function(ws) {
+    var url = '';
+    ws.on('message', function(message) {
+        nightmare
+        //load a url
+            .goto('http://observatorio.digemid.minsa.gob.pe/Precios/ProcesoL/Consulta/BusquedaGral.aspx?grupo=2926*3&total=1*1&con=120*mg/5*mL&ffs=24&ubigeo=15&cad=PARACETAL*120*mg/5*mL*Solucion*-*Suspension')
+            .click('input[value="filtroTodos"]')
+            .wait(4000)
+            .evaluate(function () {
+                return [].map.call(document.querySelectorAll('tr.odd td a'),
+                    function(link) {
+                        //console.log(link);
+                        return link.href.split("'")[1];
+                    }
+                )
+            })
+            .end()
+            //run the queue of commands specified, followed by logging the HREF
+            .then(function(result) {
+                for (i = 0; i < result.length; i++) {
+                    var xurl = 'http://observatorio.digemid.minsa.gob.pe/Precios/ProcesoL/Consulta/' + result[i];
+                    console.log(xurl);
+                    var gurl = '';
+                    var x = request(xurl, function (error, response, html) {
+                        if (!error && response.statusCode == 200) {
+                            var $ = cheerio.load(html);
+                            var html_view = '';
+                            var blah = {};
+                            $('span').each(function(i, element){
+                                if (typeof element.children[0] !== 'undefined') {
+                                    blah[element.attribs.id] = element.children[0].data;
+                                    html_view += '<strong>'+element.attribs.id+'</strong>:'+element.children[0].data+'<br>';
+                                }
+                            });
+                            blah['html'] = html_view;
+                            blah['MontoEmpaque'] = parseFloat(blah['MontoEmpaque']);
+                            if (blah['MontoEmpaque'] > 0) {
+                                //ws.send(JSON.stringify(blah));
+                                gurl='http://api.opencagedata.com/geocode/v1/json?q='+blah['Direccion']+' '+blah['Ubicacion']+'&key=2dd23d225d904e7d81bdb0ef70f71567'
+                                console.log(gurl);
+                                request({
+                                    url: gurl,
+                                    json: true
+                                }, function (xerror, xresponse, body) {
+                                    if (!xerror && xresponse.statusCode === 200) {
+                                        if (typeof body.results[0] !== 'undefined') {
+                                            blah['coordinates'] = body.results[0].geometry;
+                                            console.log(body.results[0].geometry);
+                                        }
+                                        ws.send(JSON.stringify(blah), function ack(werror) {
+                                            console.log('failed');
+                                            console.log(werror);
+                                        });
+                                        //ws.send();
+                                        //console.log(blah) // Print the json response
+                                    }
+                                })
+                            }
+                            //ws.send(JSON.stringify(blah));
+
+                            //return gurl;
+                        }
+                    });
+                    //console.log(x);
+                }
+
+            })
+            //catch errors if they happen
+            .catch(function(error){
+                console.error('an error has occurred: ' + error);
+            });
+    });
+});
